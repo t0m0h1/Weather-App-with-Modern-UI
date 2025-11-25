@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Weather & AQI — Demo</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1>Weather & AQI</h1>
+    <div class="search">
+      <input id="search-input" placeholder="Search city or postcode..." />
+      <div id="search-results" class="results"></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="current-card" class="card large">
+      <div id="current-main">
+        <h2 id="city-name">--</h2>
+        <div id="temp">--°C</div>
+        <div id="weather-desc">--</div>
+      </div>
+      <div id="aqi-card" class="card small">
+        <h3>AQI</h3>
+        <div id="aqi-value">--</div>
+        <div id="aqi-details"></div>
+      </div>
+    </section>
+
+    <section id="forecast" class="card">
+      <h3>7-Day Forecast</h3>
+      <div id="daily-list" class="horizontal"></div>
+    </section>
+
+    <section id="hourly" class="card">
+      <h3>Hourly</h3>
+      <canvas id="hourly-chart" height="120"></canvas>
+    </section>
+
+    <section id="favorites" class="card">
+      <h3>Favorites</h3>
+      <div id="fav-list"></div>
+    </section>
+  </main>
+
+  <script src="/static/js/main.js"></script>
+</body>
+</html>
