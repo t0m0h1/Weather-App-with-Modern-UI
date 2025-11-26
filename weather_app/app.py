@@ -19,20 +19,23 @@ def api_search():
 
 @app.route('/api/weather')
 def api_weather():
-    lat = request.args.get('lat')
-    lon = request.args.get('lon')
+    lat = request.args.get("lat")
+    lon = request.args.get("lon")
 
-    # Get each component
-    current = get_current_weather(lat, lon)
-    forecast = get_forecast(lat, lon)
-    aqi = get_aqi(lat, lon)
+    onecall = get_onecall(lat, lon)   # <-- Your One Call fetch
+    aqi = get_aqi(lat, lon)           # <-- Your AQI fetch
 
-    # UI expects exactly these keys:
-    return {
-        "weather": current,
-        "forecast": forecast,
-        "aqi": aqi
+    # Transform into what the frontend expects:
+    transformed = {
+        "weather": onecall["current"],              # ⬅ UI expects "weather.main.temp"
+        "forecast": {
+            "hourly": onecall.get("hourly", []),    # ⬅ UI expects "forecast.hourly"
+            "daily": onecall.get("daily", [])       # ⬅ UI expects "forecast.daily"
+        },
+        "aqi": aqi                                   # ⬅ UI expects "aqi.list[0]"
     }
+
+    return transformed
 
 
 @app.route('/api/favorites', methods=['POST','DELETE'])
