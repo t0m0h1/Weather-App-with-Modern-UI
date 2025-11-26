@@ -22,17 +22,20 @@ def api_weather():
     lat = request.args.get("lat")
     lon = request.args.get("lon")
 
-    onecall = get_forecast(lat, lon)   # <-- Your One Call fetch
-    aqi = get_aqi(lat, lon)           # <-- Your AQI fetch
+    current = get_current_weather(lat, lon)  # always separate
+    forecast = get_forecast(lat, lon)        # may include hourly/daily
+    aqi = get_aqi(lat, lon)
 
-    # Transform into what the frontend expects:
+    # Wrap in frontend-friendly structure with safe defaults
     transformed = {
-        "weather": onecall["current"],              # ⬅ UI expects "weather.main.temp"
+        "weather": current if current else {},
+
         "forecast": {
-            "hourly": onecall.get("hourly", []),    # ⬅ UI expects "forecast.hourly"
-            "daily": onecall.get("daily", [])       # ⬅ UI expects "forecast.daily"
+            "hourly": forecast.get("hourly", []) if forecast else [],
+            "daily": forecast.get("daily", []) if forecast else []
         },
-        "aqi": aqi                                   # ⬅ UI expects "aqi.list[0]"
+
+        "aqi": aqi if aqi else {}
     }
 
     return transformed

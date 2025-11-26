@@ -35,52 +35,71 @@ async function selectPlace(p){
 
 async function loadWeather(lat, lon, displayName='Location'){
   cityName.textContent = displayName;
-  const res = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
-  const data = await res.json();
-  if(data.error){ tempEl.textContent='err'; return }
-  const w = data.weather;
-  const f = data.forecast;
-  const a = data.aqi;
 
-  // Current
-  try{ tempEl.textContent = Math.round(w.main.temp) + '°C'; }catch(e){ tempEl.textContent='--' }
-  try{ descEl.textContent = w.weather[0].description }catch(e){ descEl.textContent='--' }
+  let data;
+  try {
+    const res = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
+    data = await res.json();
+  } catch(err) {
+    console.error('Fetch error:', err);
+    tempEl.textContent = '--';
+    descEl.textContent = '--';
+    aqiValue.textContent = '--';
+    dailyList.innerHTML = '';
+    return;
+  }
+
+  const w = data.weather || {};
+  const f = data.forecast || { hourly: [], daily: [] };
+  const a = data.aqi || {};
+
+  // Current weather
+  const temp = w.main?.temp ?? '--';
+  const desc = w.weather?.[0]?.description ?? '--';
+  tempEl.textContent = (temp !== '--') ? Math.round(temp) + '°C' : '--';
+  descEl.textContent = desc;
 
   // AQI
-  try{
-    const aqi = a.list && a.list[0] && a.list[0].main ? a.list[0].main.aqi : 'n/a';
-    aqiValue.textContent = aqi;
-    aqiDetails.textContent = JSON.stringify(a.list && a.list[0] && a.list[0].components ? a.list[0].components : {});
-  }catch(e){ aqiValue.textContent='--' }
+  const aqiNumber = a.list?.[0]?.main?.aqi ?? 'n/a';
+  const aqiComponents = a.list?.[0]?.components ?? {};
+  aqiValue.textContent = aqiNumber;
+  aqiDetails.textContent = JSON.stringify(aqiComponents);
 
   // Forecast: daily
-  dailyList.innerHTML='';
-  try{
-    const days = f.daily.slice(0,7);
-    days.forEach(d=>{
-      const el = document.createElement('div');
-      el.style.minWidth='110px';
-      el.innerHTML = `<div class="muted">${new Date(d.dt*1000).toDateString().split(' ')[0]}</div>
-                      <div style="font-weight:600">${Math.round(d.temp.max)}° / ${Math.round(d.temp.min)}°</div>
-                      <div class="muted">${d.weather[0].main}</div>`;
-      dailyList.appendChild(el);
+  dailyList.innerHTML = '';
+  if (f.daily?.length) {
+    f.daily.slice(0, 7).forEach(d => {
+      const dayEl = document.createElement('div');
+      dayEl.style.minWidth = '110px';
+      dayEl.innerHTML = `
+        <div class="muted">${new Date(d.dt*1000).toDateString().split(' ')[0]}</div>
+        <div style="font-weight:600">${Math.round(d.temp.max)}° / ${Math.round(d.temp.min)}°</div>
+        <div class="muted">${d.weather?.[0]?.main ?? '--'}</div>
+      `;
+      dailyList.appendChild(dayEl);
     });
-  }catch(e){ console.log(e) }
+  } else {
+    dailyList.innerHTML = '<div class="muted">No forecast available</div>';
+  }
 
   // Hourly chart
-  try{
+  if (f.hourly?.length) {
     const hours = f.hourly.slice(0,24);
-    const labels = hours.map(h=> new Date(h.dt*1000).getHours()+':00');
-    const temps = hours.map(h=> h.temp);
+    const labels = hours.map(h => new Date(h.dt*1000).getHours() + ':00');
+    const temps = hours.map(h => h.temp ?? 0);
     const ctx = document.getElementById('hourly-chart').getContext('2d');
     if(hourlyChart) hourlyChart.destroy();
     hourlyChart = new Chart(ctx, {
       type:'line',
-      data:{labels:labels, datasets:[{label:'Temp (°C)', data:temps, fill:true}]},
+      data:{labels, datasets:[{label:'Temp (°C)', data:temps, fill:true}]},
       options:{responsive:true, plugins:{legend:{display:false}}}
     });
-  }catch(e){ console.log(e) }
+  } else {
+    if(hourlyChart) hourlyChart.destroy();
+  }
 }
+
+
 
 // Load favorites on page load
 async function loadFavorites(){
