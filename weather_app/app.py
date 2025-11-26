@@ -21,12 +21,19 @@ def api_search():
 def api_weather():
     lat = request.args.get('lat')
     lon = request.args.get('lon')
-    if not lat or not lon:
-        return jsonify({'error':'missing coordinates'}), 400
-    weather = get_current_weather(lat, lon)
+
+    # Get each component
+    current = get_current_weather(lat, lon)
     forecast = get_forecast(lat, lon)
     aqi = get_aqi(lat, lon)
-    return jsonify({'weather': weather, 'forecast': forecast, 'aqi': aqi})
+
+    # UI expects exactly these keys:
+    return {
+        "weather": current,
+        "forecast": forecast,
+        "aqi": aqi
+    }
+
 
 @app.route('/api/favorites', methods=['POST','DELETE'])
 def api_favorites():
