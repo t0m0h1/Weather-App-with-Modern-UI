@@ -22,7 +22,7 @@ def api_weather():
     lat = request.args.get("lat")
     lon = request.args.get("lon")
 
-    onecall = get_onecall(lat, lon)   # <-- Your One Call fetch
+    onecall = get_forecast(lat, lon)   # <-- Your One Call fetch
     aqi = get_aqi(lat, lon)           # <-- Your AQI fetch
 
     # Transform into what the frontend expects:
