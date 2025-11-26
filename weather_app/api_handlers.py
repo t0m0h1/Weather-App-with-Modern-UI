@@ -1,6 +1,6 @@
 import os, requests
 
-OPENWEATHER_API_KEY = os.environ.get('OPENWEATHER_API_KEY','YOUR_OPENWEATHER_KEY')
+OPENWEATHER_API_KEY = os.environ.get('OPENWEATHER_API_KEY','35ed645b1c1e1c93adbef5a06edcefdd')
 IQAIR_API_KEY = os.environ.get('IQAIR_API_KEY','YOUR_IQAIR_KEY')  # optional
 
 def get_current_weather(lat, lon):
